@@ -228,11 +228,23 @@ function GradientSky({ scrollProgress }) {
             return sin(x) * 0.5 + sin(x * 0.5) * 0.35 + sin(x * 0.25) * 0.15;
           }
 
+          float hash21(vec2 p) {
+            p = fract(p * vec2(123.34, 456.21));
+            p += dot(p, p + 34.345);
+            return fract(p.x * p.y);
+          }
+
           void main() {
             float t = clamp(vUv.y, 0.0, 1.0);
             float scrollTilt = (uScroll - 0.5) * 0.06;
             float drift = softWave(uTime * 0.08 + vUv.x * 2.0) * 0.03;
             vec3 col = mix(uBottomColor, uTopColor, smoothstep(0.0, 1.0, t + drift));
+
+            // Subtle "sketch" grain to match the concept feel
+            float n = hash21(vUv * vec2(960.0, 540.0) + uTime * 0.02);
+            float grain = (n - 0.5) * 0.035;
+            col += grain;
+
             gl_FragColor = vec4(col + scrollTilt, 1.0);
           }
         `}

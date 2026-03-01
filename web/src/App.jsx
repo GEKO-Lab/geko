@@ -4,52 +4,87 @@ import { useScrollProgress } from './hooks/useScrollProgress'
 import { CategorySection } from './components/CategorySection'
 import gekoLogoWhite from './assets/geko-logo-white.png'
 import gekoProfile from './assets/geko-profile.png'
+import { useEffect, useMemo, useState } from 'react'
 
 function App() {
   const scrollProgress = useScrollProgress()
+  const [activeSectionId, setActiveSectionId] = useState('animierte-plakat')
 
-  const categories = [
-    {
-      id: 'animierte-plakat',
-      title: 'Animierte Plakat',
-      description: 'Motion-Poster, Loop-Animationen und typografische Studien.',
-    },
-    {
-      id: 'corporate-design',
-      title: 'Corporate Designs (CD)',
-      description: 'Branding, Logomarken, Systeme und Anwendungen.',
-    },
-    {
-      id: 'animationen',
-      title: 'Animationen',
-      description: '2D/3D Motion, kurze Clips, Sequenzen und Tests.',
-    },
-    {
-      id: '3d-modelle',
-      title: '3D Modelle',
-      description: 'Modeling, Shading und Render-Studies.',
-    },
-    {
-      id: 'charakterdesign',
-      title: 'Charakterdesign',
-      description: 'Figuren, Silhouetten, Turnarounds und Expressions.',
-    },
-    {
-      id: 'artworks',
-      title: 'Artworks',
-      description: 'Illustrationen, Concepts und visuelle Experimente.',
-    },
-    {
-      id: 'posters',
-      title: 'Posters',
-      description: 'Plakatserien, Layouts und Druck-Varianten.',
-    },
-    {
-      id: 'photos',
-      title: 'Photos',
-      description: 'Fotografie, Bearbeitung und Serien.',
-    },
-  ]
+  const categories = useMemo(
+    () => [
+      {
+        id: 'animierte-plakat',
+        title: 'Animierte Plakat',
+        nav: 'Plakat',
+        description: 'Motion-Poster, Loop-Animationen und typografische Studien.',
+      },
+      {
+        id: 'corporate-design',
+        title: 'Corporate Designs (CD)',
+        nav: 'CD',
+        description: 'Branding, Logomarken, Systeme und Anwendungen.',
+      },
+      {
+        id: 'animationen',
+        title: 'Animationen',
+        nav: 'Animation',
+        description: '2D/3D Motion, kurze Clips, Sequenzen und Tests.',
+      },
+      {
+        id: '3d-modelle',
+        title: '3D Modelle',
+        nav: '3D',
+        description: 'Modeling, Shading und Render-Studies.',
+      },
+      {
+        id: 'charakterdesign',
+        title: 'Charakterdesign',
+        nav: 'Charakter',
+        description: 'Figuren, Silhouetten, Turnarounds und Expressions.',
+      },
+      {
+        id: 'artworks',
+        title: 'Artworks',
+        nav: 'Artworks',
+        description: 'Illustrationen, Concepts und visuelle Experimente.',
+      },
+      {
+        id: 'posters',
+        title: 'Posters',
+        nav: 'Posters',
+        description: 'Plakatserien, Layouts und Druck-Varianten.',
+      },
+      {
+        id: 'photos',
+        title: 'Photos',
+        nav: 'Photos',
+        description: 'Fotografie, Bearbeitung und Serien.',
+      },
+    ],
+    [],
+  )
+
+  useEffect(() => {
+    const sectionEls = categories
+      .map((c) => document.getElementById(c.id))
+      .filter(Boolean)
+
+    if (!sectionEls.length) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0]
+
+        if (visible?.target?.id) setActiveSectionId(visible.target.id)
+      },
+      { threshold: [0.2, 0.35, 0.5, 0.65] },
+    )
+
+    sectionEls.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [categories])
 
   return (
     <div className="appRoot">
@@ -61,32 +96,41 @@ function App() {
           <div className="brandText">GEKO</div>
         </div>
         <nav className="topNav" aria-label="Portfolio">
-          <a href="#animierte-plakat">Plakat</a>
-          <a href="#corporate-design">CD</a>
-          <a href="#animationen">Animation</a>
-          <a href="#3d-modelle">3D</a>
-          <a href="#charakterdesign">Charakter</a>
-          <a href="#artworks">Artworks</a>
-          <a href="#posters">Posters</a>
-          <a href="#photos">Photos</a>
+          {categories.map((c) => (
+            <a
+              key={c.id}
+              className={activeSectionId === c.id ? 'isActive' : undefined}
+              href={`#${c.id}`}
+              aria-current={activeSectionId === c.id ? 'page' : undefined}
+            >
+              {c.nav}
+            </a>
+          ))}
         </nav>
       </header>
 
       <main className="content">
         <section className="hero">
-          <div className="heroCard">
-            <div className="heroKicker">Kommunikationsdesign Portfolio</div>
-            <h1 className="heroTitle">Live-Landschaft als Scroll-Wallpaper.</h1>
-            <p className="heroSub">
-              Kategorien sind als schwarze Flächen über der Szene angeordnet.
-              Beim Scrollen bewegt sich der Hintergrund weich mit.
-            </p>
+          <div className="heroLayout">
+            <div className="heroBlock heroBlockTop">
+              <div className="heroKicker">Kommunikationsdesign Portfolio</div>
+              <h1 className="heroTitle">Live-Landschaft als Scroll-Wallpaper.</h1>
+              <p className="heroSub">
+                Kategorien liegen als schwarze Flächen über der Szene. Beim Scrollen
+                bewegt sich der Hintergrund weich mit.
+              </p>
+            </div>
 
-            <div className="profileRow" aria-label="Profil">
-              <img className="profileImg" src={gekoProfile} alt="Profilbild" />
-              <div className="profileText">
-                <div className="profileName">junes</div>
-                <div className="profileRole">Kommunikationsdesigner · Motion · 3D</div>
+            <div className="heroBlock heroBlockBottom" aria-label="Profil">
+              <div className="profileRow">
+                <img className="profileImg" src={gekoProfile} alt="Profilbild" />
+                <div className="profileText">
+                  <div className="profileName">junes</div>
+                  <div className="profileRole">Kommunikationsdesigner · Motion · 3D</div>
+                </div>
+              </div>
+              <div className="heroHint">
+                Scroll, um die Kategorien in den schwarzen Flächen zu entdecken.
               </div>
             </div>
           </div>

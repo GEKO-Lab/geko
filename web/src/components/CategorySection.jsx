@@ -1,6 +1,10 @@
+import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
+
 export function CategorySection({ id, title, description }) {
+  const revealRef = useRevealOnScroll()
+
   return (
-    <section id={id} className="panel category">
+    <section ref={revealRef} id={id} className="panel category">
       <div className="categoryHeader">
         <h2>{title}</h2>
         <p>{description}</p>
