@@ -74,35 +74,40 @@
 }
 
 .hero {
-  min-height: 92vh;
+  min-height: 74vh;
   display: grid;
   align-items: end;
   padding: 110px 0 42px;
 }
 
-.heroLayout {
-  position: relative;
+.heroTitleBlock {
   width: min(980px, 100%);
-  min-height: min(640px, 70vh);
-}
-
-.heroBlock {
+  padding: 26px 22px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 26px 22px;
   box-shadow: 0 24px 90px rgba(0, 0, 0, 0.35);
 }
 
-.heroBlockTop {
-  width: min(560px, 92%);
-  min-height: 280px;
-  margin-left: 0;
+.heroTitleMark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(245, 224, 106, 0.9), rgba(243, 107, 189, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.heroBlockBottom {
-  width: min(760px, 100%);
-  margin-top: 18px;
+.pageTitle {
+  margin: 12px 0 6px;
+  font-size: clamp(3.1rem, 7vw, 5.2rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+}
+
+.pageSubtitle {
+  margin: 0;
+  color: var(--muted);
+  max-width: 70ch;
 }
 
 .heroKicker {
@@ -133,6 +138,15 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.profileImgLg {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
   border: 1px solid var(--line);
   object-fit: cover;
   background: rgba(0, 0, 0, 0.35);
@@ -169,6 +183,28 @@
   min-height: 80vh;
 }
 
+.bigPanel {
+  min-height: auto;
+  scroll-margin-top: 82px;
+}
+
+.panelHead {
+  display: grid;
+  gap: 8px;
+  max-width: 80ch;
+}
+
+.panelHead h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: 0.01em;
+}
+
+.panelHead p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .reveal {
   opacity: 0.001;
   transform: translateY(18px);
@@ -182,25 +218,8 @@
   transform: translateY(0);
 }
 
-.category {
-  scroll-margin-top: 82px;
-}
-
-.panel h2 {
-  margin: 0 0 8px;
-  font-size: 1.35rem;
-  letter-spacing: 0.01em;
-}
-
-.panel p {
-  margin: 0;
+.muted {
   color: var(--muted);
-}
-
-.categoryHeader {
-  display: grid;
-  gap: 8px;
-  max-width: 70ch;
 }
 
 .thumbGrid {
@@ -208,6 +227,91 @@
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.aboutGrid {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.aboutCard {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 16px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.aboutText {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.aboutText p {
+  margin: 0;
+}
+
+.miniTitle {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+}
+
+.tagList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tagList li {
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.categoryGrid {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.catCard {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 16px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.catTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.catDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, rgba(245, 224, 106, 0.9), rgba(243, 107, 189, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.catTitle {
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.catDesc {
+  margin-top: 6px;
+  color: var(--muted);
+  max-width: 78ch;
 }
 
 .thumbCard {
@@ -239,25 +343,31 @@
   font-size: 0.9rem;
 }
 
+.footerPanel {
+  min-height: auto;
+}
+
+.footerGrid {
+  display: grid;
+  gap: 16px;
+}
+
 @media (min-width: 980px) {
   .topNav {
     display: flex;
   }
 
-  .heroLayout {
-    min-height: 72vh;
+  .aboutGrid {
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: start;
   }
 
-  .heroBlockTop {
-    position: absolute;
-    left: 0;
-    top: 18px;
+  .categoryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .heroBlockBottom {
-    position: absolute;
-    left: 0;
-    bottom: 0;
+  .footerGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .thumbGrid {

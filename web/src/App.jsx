@@ -1,90 +1,62 @@
 import './App.css'
 import LandscapeBackground from './components/LandscapeBackground'
 import { useScrollProgress } from './hooks/useScrollProgress'
-import { CategorySection } from './components/CategorySection'
 import gekoLogoWhite from './assets/geko-logo-white.png'
 import gekoProfile from './assets/geko-profile.png'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useRevealOnScroll } from './hooks/useRevealOnScroll'
 
 function App() {
   const scrollProgress = useScrollProgress()
-  const [activeSectionId, setActiveSectionId] = useState('animierte-plakat')
+  const aboutRef = useRevealOnScroll()
+  const categoriesRef = useRevealOnScroll()
+  const footerRef = useRevealOnScroll()
 
   const categories = useMemo(
     () => [
       {
         id: 'animierte-plakat',
         title: 'Animierte Plakat',
-        nav: 'Plakat',
         description: 'Motion-Poster, Loop-Animationen und typografische Studien.',
       },
       {
         id: 'corporate-design',
         title: 'Corporate Designs (CD)',
-        nav: 'CD',
         description: 'Branding, Logomarken, Systeme und Anwendungen.',
       },
       {
         id: 'animationen',
         title: 'Animationen',
-        nav: 'Animation',
         description: '2D/3D Motion, kurze Clips, Sequenzen und Tests.',
       },
       {
         id: '3d-modelle',
         title: '3D Modelle',
-        nav: '3D',
         description: 'Modeling, Shading und Render-Studies.',
       },
       {
         id: 'charakterdesign',
         title: 'Charakterdesign',
-        nav: 'Charakter',
         description: 'Figuren, Silhouetten, Turnarounds und Expressions.',
       },
       {
         id: 'artworks',
         title: 'Artworks',
-        nav: 'Artworks',
         description: 'Illustrationen, Concepts und visuelle Experimente.',
       },
       {
         id: 'posters',
         title: 'Posters',
-        nav: 'Posters',
         description: 'Plakatserien, Layouts und Druck-Varianten.',
       },
       {
         id: 'photos',
         title: 'Photos',
-        nav: 'Photos',
         description: 'Fotografie, Bearbeitung und Serien.',
       },
     ],
     [],
   )
-
-  useEffect(() => {
-    const sectionEls = categories
-      .map((c) => document.getElementById(c.id))
-      .filter(Boolean)
-
-    if (!sectionEls.length) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0]
-
-        if (visible?.target?.id) setActiveSectionId(visible.target.id)
-      },
-      { threshold: [0.2, 0.35, 0.5, 0.65] },
-    )
-
-    sectionEls.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [categories])
 
   return (
     <div className="appRoot">
@@ -95,55 +67,123 @@ function App() {
           <img className="brandLogo" src={gekoLogoWhite} alt="GEKO Logo" />
           <div className="brandText">GEKO</div>
         </div>
-        <nav className="topNav" aria-label="Portfolio">
-          {categories.map((c) => (
-            <a
-              key={c.id}
-              className={activeSectionId === c.id ? 'isActive' : undefined}
-              href={`#${c.id}`}
-              aria-current={activeSectionId === c.id ? 'page' : undefined}
-            >
-              {c.nav}
-            </a>
-          ))}
+        <nav className="topNav" aria-label="Sektionen">
+          <a href="#about">Über mich</a>
+          <a href="#kategorien">Kategorien</a>
+          <a href="#footer">Footer</a>
         </nav>
       </header>
 
       <main className="content">
         <section className="hero">
-          <div className="heroLayout">
-            <div className="heroBlock heroBlockTop">
-              <div className="heroKicker">Kommunikationsdesign Portfolio</div>
-              <h1 className="heroTitle">Live-Landschaft als Scroll-Wallpaper.</h1>
-              <p className="heroSub">
-                Kategorien liegen als schwarze Flächen über der Szene. Beim Scrollen
-                bewegt sich der Hintergrund weich mit.
-              </p>
-            </div>
+          <div className="heroTitleBlock">
+            <div className="heroTitleMark" aria-hidden="true" />
+            <h1 className="pageTitle">GEKO</h1>
+            <p className="pageSubtitle">
+              Portfolio · Kommunikationsdesign · Motion · 3D
+            </p>
+          </div>
+        </section>
 
-            <div className="heroBlock heroBlockBottom" aria-label="Profil">
+        <section ref={aboutRef} id="about" className="panel bigPanel">
+          <div className="panelHead">
+            <h2>Über mich</h2>
+            <p>Kurzer Text über dich + Skills + Fokus. (Platzhalter)</p>
+          </div>
+
+          <div className="aboutGrid">
+            <div className="aboutCard">
               <div className="profileRow">
-                <img className="profileImg" src={gekoProfile} alt="Profilbild" />
+                <img className="profileImgLg" src={gekoProfile} alt="Profilbild" />
                 <div className="profileText">
-                  <div className="profileName">junes</div>
+                  <div className="profileName">Dein Name</div>
                   <div className="profileRole">Kommunikationsdesigner · Motion · 3D</div>
                 </div>
               </div>
-              <div className="heroHint">
-                Scroll, um die Kategorien in den schwarzen Flächen zu entdecken.
+
+              <div className="aboutText">
+                <p>
+                  Ich gestalte visuelle Systeme, Animationen und 3D‑Welten.
+                  Meine Arbeiten verbinden Grafik, Bewegung und Atmosphäre.
+                </p>
+                <p className="muted">
+                  Standort · Kontakt · Verfügbarkeit (Platzhalter)
+                </p>
               </div>
+            </div>
+
+            <div className="aboutCard">
+              <div className="miniTitle">Skills</div>
+              <ul className="tagList" aria-label="Skills">
+                <li>Brand Design</li>
+                <li>Motion Design</li>
+                <li>3D</li>
+                <li>Illustration</li>
+                <li>Typography</li>
+                <li>UI/Visual</li>
+              </ul>
+
+              <div className="miniTitle">Tools</div>
+              <ul className="tagList" aria-label="Tools">
+                <li>After Effects</li>
+                <li>Blender</li>
+                <li>Cinema 4D</li>
+                <li>Photoshop</li>
+                <li>Illustrator</li>
+                <li>Figma</li>
+              </ul>
             </div>
           </div>
         </section>
 
-        {categories.map((c) => (
-          <CategorySection
-            key={c.id}
-            id={c.id}
-            title={c.title}
-            description={c.description}
-          />
-        ))}
+        <section ref={categoriesRef} id="kategorien" className="panel bigPanel">
+          <div className="panelHead">
+            <h2>Kategorien</h2>
+            <p>Platzhalter-Kacheln – hier kommen später deine Projekte rein.</p>
+          </div>
+
+          <div className="categoryGrid">
+            {categories.map((c) => (
+              <article key={c.id} className="catCard">
+                <div className="catTitleRow">
+                  <div className="catDot" aria-hidden="true" />
+                  <div className="catTitle">{c.title}</div>
+                </div>
+                <div className="catDesc">{c.description}</div>
+
+                <div className="thumbGrid" aria-label={`${c.title} Platzhalter`}>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="thumbCard">
+                      <div className="thumbMedia" />
+                      <div className="thumbMeta">
+                        <div className="thumbTitle">{`Projekt ${String(i + 1).padStart(2, '0')}`}</div>
+                        <div className="thumbSub">Platzhalter</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section ref={footerRef} id="footer" className="panel footerPanel">
+          <div className="footerGrid">
+            <div>
+              <div className="miniTitle">Kontakt</div>
+              <div className="muted">E‑Mail: name@mail.com (Platzhalter)</div>
+              <div className="muted">Instagram / Behance / Vimeo (Platzhalter)</div>
+            </div>
+            <div>
+              <div className="miniTitle">Impressum</div>
+              <div className="muted">Text/Links (Platzhalter)</div>
+            </div>
+            <div>
+              <div className="miniTitle">Copyright</div>
+              <div className="muted">© {new Date().getFullYear()} GEKO</div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
