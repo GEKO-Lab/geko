@@ -4,8 +4,8 @@ import * as THREE from 'three'
 
 const COLORS = {
   purpleBase: '#12081f',
-  purpleTop: '#b44ae8',
-  purpleMid: '#d44a9a',
+  purple: '#a855f7',
+  pink: '#ec4899',
   orange: '#ff8c2a',
   yellow: '#f5d547',
 }
@@ -32,19 +32,17 @@ function DiagonalGradientBackground({ scrollProgress }) {
 
   const uniforms = useMemo(
     () => ({
-      uTime: { value: 0 },
       uScroll: { value: 0 },
       uPurpleBase: { value: new THREE.Color(COLORS.purpleBase) },
-      uGradTop: { value: new THREE.Color(COLORS.purpleTop) },
-      uGradMid: { value: new THREE.Color(COLORS.purpleMid) },
-      uGradOrange: { value: new THREE.Color(COLORS.orange) },
-      uGradYellow: { value: new THREE.Color(COLORS.yellow) },
+      uPurple: { value: new THREE.Color(COLORS.purple) },
+      uPink: { value: new THREE.Color(COLORS.pink) },
+      uOrange: { value: new THREE.Color(COLORS.orange) },
+      uYellow: { value: new THREE.Color(COLORS.yellow) },
     }),
     [],
   )
 
-  useFrame((_, delta) => {
-    uniforms.uTime.value += delta
+  useFrame(() => {
     uniforms.uScroll.value = scrollProgress
   })
 
@@ -61,31 +59,33 @@ function DiagonalGradientBackground({ scrollProgress }) {
           }
         `}
         fragmentShader={`
-          uniform float uTime;
           uniform float uScroll;
           uniform vec3 uPurpleBase;
-          uniform vec3 uGradTop;
-          uniform vec3 uGradMid;
-          uniform vec3 uGradOrange;
-          uniform vec3 uGradYellow;
+          uniform vec3 uPurple;
+          uniform vec3 uPink;
+          uniform vec3 uOrange;
+          uniform vec3 uYellow;
           varying vec2 vUv;
+
+          vec3 brandGradient(float t) {
+            t = clamp(t, 0.0, 1.0);
+            vec3 col = mix(uYellow, uOrange, smoothstep(0.0, 0.32, t));
+            col = mix(col, uPink, smoothstep(0.28, 0.68, t));
+            col = mix(col, uPurple, smoothstep(0.58, 1.0, t));
+            return col;
+          }
 
           void main() {
             vec2 uv = vUv;
 
-            // Diagonal edge — lower offset keeps GEKO area in solid purple
             float slope = 0.72;
             float offset = -0.22 - uScroll * 0.38;
             float diag = uv.y + uv.x * slope + offset;
 
-            // Soft diagonal band for scroll reveal
-            float edge = smoothstep(0.38, 0.62, diag);
+            // Clean diagonal — minimal AA only (no soft black bleed)
+            float edge = smoothstep(0.499, 0.501, diag);
 
-            // Vertical brand gradient (purple → orange → yellow)
-            float t = clamp(uv.y + sin(uTime * 0.04 + uv.x * 0.8) * 0.008, 0.0, 1.0);
-            vec3 grad = mix(uGradYellow, uGradOrange, smoothstep(0.0, 0.38, t));
-            grad = mix(grad, uGradMid, smoothstep(0.25, 0.62, t));
-            grad = mix(grad, uGradTop, smoothstep(0.5, 1.0, t));
+            vec3 grad = brandGradient(uv.y);
 
             vec3 col = mix(uPurpleBase, grad, edge);
             gl_FragColor = vec4(col, 1.0);

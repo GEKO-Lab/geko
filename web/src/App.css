@@ -89,12 +89,19 @@
   box-shadow: 0 24px 90px rgba(0, 0, 0, 0.35);
 }
 
-.heroTitleMark {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--geko-yellow), var(--geko-orange), var(--geko-purple));
-  border: 1px solid rgba(255, 255, 255, 0.18);
+.heroGradientBar {
+  width: min(320px, 78%);
+  height: 7px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+  background: linear-gradient(
+    90deg,
+    var(--geko-purple) 0%,
+    var(--geko-pink) 32%,
+    var(--geko-orange) 66%,
+    var(--geko-yellow) 100%
+  );
+  box-shadow: 0 0 24px rgba(168, 85, 247, 0.35);
 }
 
 .pageTitle {
@@ -299,7 +306,7 @@
   width: 10px;
   height: 10px;
   border-radius: 99px;
-  background: linear-gradient(135deg, var(--geko-yellow), var(--geko-orange), var(--geko-purple));
+  background: linear-gradient(135deg, var(--geko-purple), var(--geko-pink), var(--geko-orange), var(--geko-yellow));
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
