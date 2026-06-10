@@ -5,10 +5,20 @@
   pointer-events: none;
 }
 
-.bgCanvas canvas {
-  display: block;
+.waveBackground {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.waveBackground > div {
   width: 100%;
   height: 100%;
+}
+
+.waveBackground svg {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .appRoot {
