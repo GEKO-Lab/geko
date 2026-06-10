@@ -77,8 +77,8 @@ function App() {
       <main className="content">
         <section className="hero">
           <div className="heroTitleBlock">
-            <div className="heroGradientBar" aria-hidden="true" />
             <h1 className="pageTitle">GEKO</h1>
+            <div className="heroGradientBar" aria-hidden="true" />
             <p className="pageSubtitle">
               Portfolio · Kommunikationsdesign · Motion · 3D
             </p>
