@@ -90,10 +90,10 @@
 }
 
 .heroGradientBar {
-  width: min(320px, 92%);
-  height: 6px;
+  width: min(320px, 78%);
+  height: 7px;
   border-radius: 999px;
-  margin: 10px 0 14px;
+  margin: 6px 0 18px;
   background: linear-gradient(
     90deg,
     var(--geko-purple) 0%,
@@ -101,11 +101,11 @@
     var(--geko-orange) 66%,
     var(--geko-yellow) 100%
   );
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 24px rgba(168, 85, 247, 0.35);
 }
 
 .pageTitle {
-  margin: 0;
+  margin: 12px 0 6px;
   font-size: clamp(3.1rem, 7vw, 5.2rem);
   line-height: 0.95;
   letter-spacing: 0.02em;
