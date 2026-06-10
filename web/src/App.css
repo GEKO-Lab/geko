@@ -93,7 +93,7 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(245, 224, 106, 0.9), rgba(243, 107, 189, 0.9));
+  background: linear-gradient(135deg, var(--geko-yellow), var(--geko-orange), var(--geko-purple));
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
@@ -299,7 +299,7 @@
   width: 10px;
   height: 10px;
   border-radius: 99px;
-  background: linear-gradient(135deg, rgba(245, 224, 106, 0.9), rgba(243, 107, 189, 0.9));
+  background: linear-gradient(135deg, var(--geko-yellow), var(--geko-orange), var(--geko-purple));
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
@@ -323,7 +323,7 @@
 
 .thumbMedia {
   aspect-ratio: 4 / 3;
-  background: linear-gradient(135deg, rgba(245, 224, 106, 0.22), rgba(243, 107, 189, 0.12));
+  background: linear-gradient(135deg, rgba(245, 213, 71, 0.22), rgba(255, 155, 61, 0.14), rgba(180, 74, 232, 0.12));
   border-bottom: 1px solid var(--line);
 }
 

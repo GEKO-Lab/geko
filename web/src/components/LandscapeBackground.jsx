@@ -2,6 +2,16 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
+// GEKO brand palette
+const COLORS = {
+  purpleDeep: '#1a0a2e',
+  purpleMid: '#5a2d8c',
+  purpleLight: '#b44ae8',
+  yellow: '#f5d547',
+  orange: '#ff9b3d',
+  cream: '#fff4d6',
+}
+
 function CameraRig({ scrollProgress }) {
   const { camera } = useThree()
   const smoothed = useRef(scrollProgress)
@@ -11,12 +21,65 @@ function CameraRig({ scrollProgress }) {
     smoothed.current = THREE.MathUtils.lerp(smoothed.current, scrollProgress, t)
 
     const p = smoothed.current - 0.5
-    camera.position.x = p * 0.55
-    camera.position.y = -p * 0.35
+    camera.position.x = p * 0.45
+    camera.position.y = -p * 0.28
     camera.lookAt(0, 0, 0)
   })
 
   return null
+}
+
+function GradientSky({ scrollProgress }) {
+  const { viewport } = useThree()
+
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uScroll: { value: 0 },
+      uTopColor: { value: new THREE.Color(COLORS.purpleLight) },
+      uMidColor: { value: new THREE.Color(COLORS.orange) },
+      uBottomColor: { value: new THREE.Color(COLORS.yellow) },
+    }),
+    [],
+  )
+
+  useFrame((_, delta) => {
+    uniforms.uTime.value += delta
+    uniforms.uScroll.value = scrollProgress
+  })
+
+  return (
+    <mesh position={[0, 0, -4]} scale={[viewport.width, viewport.height, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <shaderMaterial
+        uniforms={uniforms}
+        vertexShader={`
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `}
+        fragmentShader={`
+          uniform float uTime;
+          uniform float uScroll;
+          uniform vec3 uTopColor;
+          uniform vec3 uMidColor;
+          uniform vec3 uBottomColor;
+          varying vec2 vUv;
+
+          void main() {
+            float t = clamp(vUv.y + (uScroll - 0.5) * 0.04, 0.0, 1.0);
+            float drift = sin(uTime * 0.06 + vUv.x * 1.5) * 0.015;
+            vec3 col = mix(uBottomColor, uMidColor, smoothstep(0.0, 0.55, t + drift));
+            col = mix(col, uTopColor, smoothstep(0.45, 1.0, t + drift));
+            gl_FragColor = vec4(col, 1.0);
+          }
+        `}
+        depthWrite={false}
+      />
+    </mesh>
+  )
 }
 
 function WaterSurface({ scrollProgress }) {
@@ -26,8 +89,9 @@ function WaterSurface({ scrollProgress }) {
     () => ({
       uTime: { value: 0 },
       uScroll: { value: 0 },
-      uDeep: { value: new THREE.Color('#1f7c64') },
-      uShallow: { value: new THREE.Color('#78d9a0') },
+      uDeep: { value: new THREE.Color(COLORS.purpleDeep) },
+      uMid: { value: new THREE.Color(COLORS.purpleMid) },
+      uHighlight: { value: new THREE.Color(COLORS.yellow) },
     }),
     [],
   )
@@ -42,7 +106,7 @@ function WaterSurface({ scrollProgress }) {
       position={[0, -viewport.height * 0.28, -1.2]}
       scale={[viewport.width, viewport.height * 0.56, 1]}
     >
-      <planeGeometry args={[1, 1, 1, 1]} />
+      <planeGeometry args={[1, 1]} />
       <shaderMaterial
         uniforms={uniforms}
         vertexShader={`
@@ -56,28 +120,20 @@ function WaterSurface({ scrollProgress }) {
           uniform float uTime;
           uniform float uScroll;
           uniform vec3 uDeep;
-          uniform vec3 uShallow;
+          uniform vec3 uMid;
+          uniform vec3 uHighlight;
           varying vec2 vUv;
-
-          float wave(vec2 p) {
-            float a = sin(p.x * 10.0 + uTime * 0.9);
-            float b = sin(p.y * 14.0 - uTime * 0.6);
-            float c = sin((p.x + p.y) * 9.0 + uTime * 0.45);
-            return (a + b + c) / 3.0;
-          }
 
           void main() {
             vec2 uv = vUv;
-            float scrollTilt = (uScroll - 0.5);
-            uv.x += scrollTilt * 0.08;
+            uv.x += (uScroll - 0.5) * 0.05;
 
-            float w = wave(uv);
+            float ripple = sin(uv.x * 5.0 + uTime * 0.35) * sin(uv.y * 3.0 - uTime * 0.25);
+            ripple = ripple * 0.5 + 0.5;
+
             float depth = smoothstep(0.0, 1.0, uv.y);
-            vec3 col = mix(uDeep, uShallow, depth);
-            col += w * 0.06;
-
-            float sheen = smoothstep(0.72, 0.95, uv.y) * (0.4 + 0.6 * sin(uTime * 0.8 + uv.x * 8.0));
-            col = mix(col, vec3(0.85, 0.98, 0.92), sheen * 0.16);
+            vec3 col = mix(uDeep, uMid, depth);
+            col = mix(col, uHighlight, ripple * 0.08 * smoothstep(0.5, 1.0, uv.y));
 
             gl_FragColor = vec4(col, 1.0);
           }
@@ -98,15 +154,14 @@ function Cliff() {
         scale={[viewport.width * 0.52, viewport.height * 0.92, 1]}
       >
         <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial color="#2b6a50" />
+        <meshBasicMaterial color={COLORS.purpleDeep} />
       </mesh>
-
       <mesh
         position={[viewport.width * 0.27, -viewport.height * 0.03, -1.75]}
         scale={[viewport.width * 0.45, viewport.height * 0.86, 1]}
       >
         <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial color="#225a44" />
+        <meshBasicMaterial color="#2a1248" />
       </mesh>
     </group>
   )
@@ -119,9 +174,10 @@ function Waterfall({ scrollProgress }) {
     () => ({
       uTime: { value: 0 },
       uScroll: { value: 0 },
-      uA: { value: new THREE.Color('#9be7c2') },
-      uB: { value: new THREE.Color('#34b48a') },
-      uFoam: { value: new THREE.Color('#e8fff2') },
+      uDeep: { value: new THREE.Color(COLORS.purpleMid) },
+      uFlow: { value: new THREE.Color(COLORS.yellow) },
+      uGlow: { value: new THREE.Color(COLORS.orange) },
+      uFoam: { value: new THREE.Color(COLORS.cream) },
     }),
     [],
   )
@@ -134,9 +190,9 @@ function Waterfall({ scrollProgress }) {
   return (
     <mesh
       position={[viewport.width * 0.35, viewport.height * 0.03, -1.4]}
-      scale={[viewport.width * 0.34, viewport.height * 0.98, 1]}
+      scale={[viewport.width * 0.32, viewport.height * 0.98, 1]}
     >
-      <planeGeometry args={[1, 1, 1, 1]} />
+      <planeGeometry args={[1, 1, 32, 64]} />
       <shaderMaterial
         uniforms={uniforms}
         vertexShader={`
@@ -149,105 +205,47 @@ function Waterfall({ scrollProgress }) {
         fragmentShader={`
           uniform float uTime;
           uniform float uScroll;
-          uniform vec3 uA;
-          uniform vec3 uB;
+          uniform vec3 uDeep;
+          uniform vec3 uFlow;
+          uniform vec3 uGlow;
           uniform vec3 uFoam;
           varying vec2 vUv;
 
-          float stripes(vec2 p) {
-            float s1 = sin((p.y + uTime * 0.75) * 26.0 + p.x * 6.0);
-            float s2 = sin((p.y + uTime * 0.35) * 43.0 - p.x * 9.0);
-            return (s1 + s2) * 0.5;
-          }
-
           void main() {
             vec2 uv = vUv;
-            uv.y += uTime * 0.35;
-            uv.x += (uScroll - 0.5) * 0.03;
+            uv.x += (uScroll - 0.5) * 0.02;
 
-            float s = stripes(uv);
-            float flow = smoothstep(-0.3, 0.8, s);
+            float edge = smoothstep(0.0, 0.14, uv.x) * smoothstep(0.0, 0.14, 1.0 - uv.x);
 
-            float edge = smoothstep(0.0, 0.12, vUv.x) * smoothstep(0.0, 0.12, 1.0 - vUv.x);
-            float alpha = 0.92 * edge;
+            // Smooth downward scroll (no high-frequency beat = no flicker)
+            float scroll = fract(uv.y * 5.5 - uTime * 0.14);
+            float streak = smoothstep(0.0, 0.4, scroll) * smoothstep(1.0, 0.45, scroll);
 
-            vec3 col = mix(uB, uA, flow);
+            float slowWave = sin(uv.y * 3.2 - uTime * 0.35) * 0.5 + 0.5;
+            slowWave = smoothstep(0.3, 0.7, slowWave);
 
-            float foamBand = smoothstep(0.07, 0.0, vUv.y) * (0.65 + 0.35 * sin(uTime * 1.2 + vUv.x * 12.0));
-            col = mix(col, uFoam, foamBand * 0.65);
+            float flow = mix(slowWave, streak, 0.4);
 
-            gl_FragColor = vec4(col, alpha);
+            vec3 col = mix(uDeep, uFlow, flow * 0.65 + 0.2);
+            col = mix(col, uGlow, streak * 0.35);
+
+            // Tier ledges (inspired by reference tiers)
+            float tier1 = smoothstep(0.72, 0.68, uv.y) * smoothstep(0.64, 0.68, uv.y);
+            float tier2 = smoothstep(0.48, 0.44, uv.y) * smoothstep(0.40, 0.44, uv.y);
+            float tier3 = smoothstep(0.24, 0.20, uv.y) * smoothstep(0.16, 0.20, uv.y);
+            float tiers = tier1 + tier2 + tier3;
+            col = mix(col, uFoam, tiers * 0.55);
+
+            // Bottom pool foam — gentle ripple
+            float pool = smoothstep(0.1, 0.0, uv.y);
+            float ripple = sin(uv.x * 14.0 - uTime * 0.5) * 0.5 + 0.5;
+            ripple = smoothstep(0.42, 0.58, ripple);
+            col = mix(col, uFoam, pool * (0.45 + ripple * 0.35));
+
+            gl_FragColor = vec4(col, 0.92 * edge);
           }
         `}
         transparent
-        depthWrite={false}
-      />
-    </mesh>
-  )
-}
-
-function GradientSky({ scrollProgress }) {
-  const { viewport } = useThree()
-
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uScroll: { value: 0 },
-      uTopColor: { value: new THREE.Color('#f36bbd') },
-      uBottomColor: { value: new THREE.Color('#f5e06a') },
-    }),
-    [],
-  )
-
-  useFrame((_, delta) => {
-    uniforms.uTime.value += delta
-    uniforms.uScroll.value = scrollProgress
-  })
-
-  return (
-    <mesh position={[0, 0, -4]} scale={[viewport.width, viewport.height, 1]}>
-      <planeGeometry args={[1, 1, 1, 1]} />
-      <shaderMaterial
-        uniforms={uniforms}
-        vertexShader={`
-          varying vec2 vUv;
-
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `}
-        fragmentShader={`
-          uniform float uTime;
-          uniform float uScroll;
-          uniform vec3 uTopColor;
-          uniform vec3 uBottomColor;
-          varying vec2 vUv;
-
-          float softWave(float x) {
-            return sin(x) * 0.5 + sin(x * 0.5) * 0.35 + sin(x * 0.25) * 0.15;
-          }
-
-          float hash21(vec2 p) {
-            p = fract(p * vec2(123.34, 456.21));
-            p += dot(p, p + 34.345);
-            return fract(p.x * p.y);
-          }
-
-          void main() {
-            float t = clamp(vUv.y, 0.0, 1.0);
-            float scrollTilt = (uScroll - 0.5) * 0.06;
-            float drift = softWave(uTime * 0.08 + vUv.x * 2.0) * 0.03;
-            vec3 col = mix(uBottomColor, uTopColor, smoothstep(0.0, 1.0, t + drift));
-
-            // Subtle "sketch" grain to match the concept feel
-            float n = hash21(vUv * vec2(960.0, 540.0) + uTime * 0.02);
-            float grain = (n - 0.5) * 0.035;
-            col += grain;
-
-            gl_FragColor = vec4(col + scrollTilt, 1.0);
-          }
-        `}
         depthWrite={false}
       />
     </mesh>
@@ -260,7 +258,7 @@ export default function LandscapeBackground({ scrollProgress = 0 }) {
       <Canvas
         orthographic
         camera={{ position: [0, 0, 5], zoom: 1 }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         <CameraRig scrollProgress={scrollProgress} />
@@ -272,4 +270,3 @@ export default function LandscapeBackground({ scrollProgress = 0 }) {
     </div>
   )
 }
-
