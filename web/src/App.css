@@ -74,10 +74,10 @@
 }
 
 .hero {
-  min-height: 74vh;
+  min-height: 52vh;
   display: grid;
-  align-items: end;
-  padding: 110px 0 42px;
+  align-items: start;
+  padding: 72px 0 42px;
 }
 
 .heroTitleBlock {
